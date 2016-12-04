@@ -156,3 +156,31 @@
 
 # get 'tags/:id' => 'tags#show',
 # as: :tag
+
+# in the controller, add the show method
+
+# def show
+#     @tag = Tag.find(params[:id])
+#     @destinations = @tag.destinations
+# end
+
+# Add this to the tags index to go to the route with the parameter. What goes into the tag_path is the name of the "argument" in the loop.
+# <%= link_to "Learn more", tag_path(tag) %>
+
+# A bigger breakdown:
+
+# When a user visits /tags/1, the route "get '/tags/:id' => 'tags#show'" sends this request to the Tags controller's show actions with {id: 1} in the params.
+
+# The '@destinations = @tag.destinations' retrieves all the destinations that belong to the tag, and stores them in the variable @destinations. The 'has_many/belongs_to' association lets us query for destinations like this.
+
+# The tag and its destinations are sent to the view to be displayed.
+
+# FORMS
+
+# <%= form_for(@destination) do |f| %>
+#       <%= f.text_field :name %>
+#       <%= f.text_field :description %>
+#       <%= f.submit "Update", :class => "btn" %>
+# <% end %>
+
+# Here's some syntax for forms, looks like .erb handles a lot, but definitely look at the docs for more info. 
