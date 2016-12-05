@@ -183,4 +183,90 @@
 #       <%= f.submit "Update", :class => "btn" %>
 # <% end %>
 
-# Here's some syntax for forms, looks like .erb handles a lot, but definitely look at the docs for more info. 
+# Here's some syntax for forms, looks like .erb handles a lot, but definitely look at the docs for more info.
+
+# More Info on Editing.
+
+# The browser makes an HTTP GET request for the URL '/destinations/1/edit'
+
+# The Rails router maps the URL to the Destinations controller's edit method. The edit method finds the destination with id 1, stores it in @destination with id 1, and passes it on the to the view.
+
+# In the view, 'form_for' creates a form with the fields of the @destination object.
+
+# Then when you fill out the form and submit it, it triggers the second turn of the request/response cycle.
+
+# The browser sends the data to the Rails app via an HTTP POST request to the URL '/destinations/update'
+
+# This time, the Rails router maps the URL to the update method.
+
+# The update method uses the 'destination_params' method to safely collect data from the form. It finds the destination in the db, updates its stuff, and redirects to the destination's show page.
+
+# MANT TO MANY
+
+# I'm using the use case of Actors, Movies, and Parts. Here's how you connect the relationship with the Movie Class. In english this means a movie has many parts, a movie has many actors, and parts belongs to actors.
+
+# class Movie < ActiveRecord::Base
+#   has_many :parts
+#   has_many :actors, through: :parts
+# end
+
+# In the Actor class, here's hwo you define the relationship with parts and movies. An actor has many parts, an actor has many movies which is connected to a part.
+
+# class Actor < ActiveRecord::Base
+#   	has_many :parts
+#   	has_many :movies, through: :parts
+# end
+
+# In the Parts class, here's how you connect the relationship with movies and actors. A part belongs to a movie. and a part belongs to an actor.
+
+# class Part < ActiveRecord::Base
+#   belongs_to :movie
+#   belongs_to :actor
+# end
+
+# Check out this ERD for the 3 tables
+# https://s3.amazonaws.com/codecademy-content/courses/learn-rails/img/has-many-through.svg
+
+# The 'has_many :through' association sets up a many-to-many relationship between movies and actors.
+
+# In your migrations for the parts table, add these columns to set up the relationship in the db. Checkout what the index:true part means later on.
+
+# t.belongs_to :movie, index: true
+# t.belongs_to :actor, index: true
+
+# t.belongs_to methods in the parts table adds the foreign keys.
+
+# remember in your controller define an index method that will grab everything you want.
+#
+# class MoviesController < ApplicationController
+#   def index
+#     @movies = Movie.all
+#   end
+# end
+
+ # remember this is how you loop through the array you just created with your db call in your controller.
+
+ # <% @movies.each do |movie|  %>
+ #    	<div class="movie">
+ #        <img src=<%=movie.image %> />
+ #        <h3><%=movie.title %> </h3>
+ #        <p><%=movie.release_year  %>  </p>
+ #      </div>
+ # <% end %>
+
+# Remember, this is how you set up the route with a "variable" and setting it as kind of a variable in your controller.
+
+# get '/movies/:id' => 'movies#show', as: :movie
+
+# In your show method, this is how you grab the movie by its ':id' then retrieve all the actors that belong to the movie, and store them in the '@actors' variable.
+
+# def show
+#     @movie = Movie.find(params[:id])
+#     @actors = Movie.find(@movie)
+# end
+
+# btw, check this out for image tags
+# <%= image_tag @movie.image %>
+
+
+# codecademy done! check out the docs to answer the questions later
