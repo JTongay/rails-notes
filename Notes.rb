@@ -270,3 +270,71 @@
 
 
 # codecademy done! check out the docs to answer the questions later
+
+# USER AUTH/REG
+
+# https://s3.amazonaws.com/codecademy-content/projects/3/two-turns-post.svg
+
+# When a user visits the signup page, the browser makes an HTTP GET request for the URL /signup
+
+# The Rails router maps the URL /signup to the Users controller's "new" action. The "new" action handles the request and passes it on to the view.
+
+# The view displays the signup form.
+
+
+# When the user fills in and submits the form, the browser sends the data via an HTTP POST request to the app.
+
+# The router maps the request to the Users controller's "create" action.
+
+# The "create" action saves the data to the database and redirects to the albums page. The action also creates a new SESSION.
+
+# generate a User model
+
+# add this method to the User model
+# has_secure_password
+
+# the above method adds functionality to save passwords securely.
+
+# In order the save passwords securely, "has_secure_password" uses an algorithm called bcrypt. The use it, we added the bcrypt gem to the Gemfile.
+
+# We created a Users controller, then added the following route in the routes file.
+
+# get 'signup'  => 'users#new'
+# resources :users
+
+# Note that this really is 2 lines.
+
+# Add the new method in the Users controller.
+
+# def new
+#   @user = User.new
+# end
+
+# Then in the view, add the form.
+
+# <%= form_for(@user) do |f| %>
+#       <%= f.text_field :first_name, :placeholder => "First name" %>
+#       <%= f.text_field :last_name, :placeholder => "Last name" %>
+#       <%= f.email_field :email, :placeholder => "Email" %>
+#       <%= f.password_field :password, :placeholder => "Password" %>
+#       <%= f.submit "Create an account", class: "btn-submit" %>
+#     <% end %>
+
+# Now we have to take in the data that is submitted through the signup form and save it to the database. In the Users controller, add a private method "user_params"
+
+# private
+  # def user_params
+  #   params.require(:user).permit(:first_name, :last_name, :email, :password)
+  # end
+
+# Then, create the "create" method
+
+# def create
+#     @user = User.new(user_params)
+#     if @user.save
+#       sessions[:user_id] = @user.id
+#       redirect_to '/'
+#     else
+#       redirect_to '/signup'
+#     end
+#   end  
