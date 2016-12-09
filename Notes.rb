@@ -332,9 +332,199 @@
 # def create
 #     @user = User.new(user_params)
 #     if @user.save
-#       sessions[:user_id] = @user.id
+#       session[:user_id] = @user.id
 #       redirect_to '/'
 #     else
 #       redirect_to '/signup'
 #     end
-#   end  
+#   end
+
+# The session is created with...
+
+# session[:user_id] = @user.id
+
+# it takes the value ""@user.id" and assigning it to the key ":user_id".
+
+# check the data we just saved using "rails console". It's a useful tool to interact with Rails apps. Use it to query the database.
+
+# Now theres login.
+
+# start by adding a login page. We need 5 pars to add to the login machinery. The model, controller, routes, views, and logic for sessions. The user model is already created when building the signup page, but lets start by generating a controller.
+
+# add controller called Sessions.
+
+# create a route for 'login' (sessions#new)
+
+# define a method for new in the sessions controller.
+
+# Then add the form in the view.
+
+# <%= form_for(:session, url: login_path) do |f| %>
+#   <%= f.email_field :email, :placeholder => "Email" %>
+#   <%= f.password_field :password, :placeholder => "Password" %>
+#   <%= f.submit "Log in", class: "btn-submit" %>
+# <% end %>
+
+# In the login form, we use "form_for(:session, url: login_path) do". This refers to the name of the resource and corresponding URL.
+# In the signup form, we used "form_for(@user) do |f|" since we had a User model. For the login form, we don't have a Session model, so we refer to the parameters above.
+
+# Next, in the routes file, create a route that maps the URL '/login' to the Session controller's "create" action.
+
+# post 'login' => 'sessions#create'
+
+# Next in the sessions controller, define the create method like so....
+
+
+# def create
+# @user=User.find_by_email(params[:session][:email])
+#   if @user && @user.authenticate(params[:session][:password])
+#     session[:user_id] = @user.id
+#     redirect_to '/'
+#   else
+#     redirect_to 'login'
+#   end
+# end
+
+
+# Now that a user can log in, add the ability to logout.
+
+# In the routes file, create route that maps the URL '/logout' to the Sessions controller's 'destroy' action.
+
+# delete 'logout' => 'sessions#destroy'
+
+# Then in the sessions controller, add the destroy action by setting the session hash to nil and redirect to the root path.
+
+# def destroy
+#   session[:user_id] = nil
+#   redirect_to '/'
+# end
+
+# The problem now, is after you logout, you can still access portions of the page that should be closed off to non-users.
+
+# You need to check whether a user is logged in before sender a request on the controller's index actions.
+
+# In the application controller had a "helper_method" called "current_user".
+
+# helper_method :current_user
+#
+# def current_user
+#   @current_user ||= User.find(session[:user_id]) if session[:user_id]
+# end
+
+# Also add another method called "require_user". For some reason, this doesn't use "helper_method".
+
+# def require_user
+#   redirect_to '/login' unless current_user
+# end
+
+# The "current_user" method determines whether a user is logged in or logged out. It does this by checking whether there's a user in the database with a given session id.
+# If there is, this means the user is logged in and "@current_user" will store that user; otherwise the user is logged out and "@current_user" will be nil.
+
+# The line "helper_method :current_user" makes "current_user" method available in the views. By default, all methods defined in Application Controller are already available in the controllers.
+
+# The "require_user" method uses the "current_user" method to redirect logged out users to the login page.
+
+
+# MORE INFO ON THE ||= syntax.
+
+# a ||= b is the same as...
+# a || a = b
+
+# > a ||= 1;
+# => 1
+# > a ||= 2;
+# => 1
+#
+# > foo = false;
+# => false
+# > foo ||= true;
+# => true
+# > foo ||= false;
+# => true
+
+# MORE INFO ON "unless"
+
+# The unless keyword is just "if" in reverse. It's a conditional statement that executes only if the condition is false instead of true.
+
+# Back to the action, use the "require_user" in the Album's controller in order to prevent logged out users from accessing certain pages. In the controller, add this action.
+
+# before_action :require_user, only: [:index, :show]
+
+# The "before_action" command calls the "require_user" method before running the index or show actions.
+
+# Now, use "current_user" in the application layout to update the nav items depending on whether a user is logged in or out.
+
+# <% if current_user %>
+#   <ul>
+#     <li><%= current_user.email %></li>
+#     <li><%= link_to "Log out", logout_path, method: "delete" %></li>
+#   </ul>
+# <% else %>
+#   <ul>
+#     <li><%= link_to "Login", 'login' %></a></li>
+#     <li><%= link_to "Signup", 'signup' %></a></li>
+#   </ul>
+# <% end %>
+
+# Now it's time to build an authorization system. Basically admin privelges.
+
+# The browser makes a request for a URL
+
+# The request hits the Rails router
+
+# Before the router sends the request on to the controller action, the app determines whether the user has access permission by looking at the user's role.
+
+# A user's role is specified in the database.
+
+# Add the role column in the Users table.
+
+# t.string :role
+
+# Now add a method in the User model that will help us use the role column in our application. Within the class User, beneath the ":has_secure_password".
+
+# def editor?
+#   self.role == 'editor'
+# end
+
+# You should now be able to use the editor? method to check whether a user has an editor role. First, start the Rails console.
+
+# rails console
+
+# Then check whether Mateo is an editor.
+
+# > mateo = User.find_by(email: 'mateo@email.com')
+# > mateo.editor?
+
+# It should return true.
+
+# The method "editor?" checks whether a user's role is "editor" and returns true or false. The method "self" to refer to the current instance of the User object.
+
+# Now add a few methods to the Application Controller.
+
+# def require_editor
+#   redirect_to '/' unless current_user.editor?
+# end
+
+# Next in the whatever controller, add this action that uses "require_editor" to permit only users with an editor role to access the "show" and "edit actions"
+
+# before_action :require_editor, only: [:show, :edit]
+
+# Then in the view, use the "editor?" method to display an edit link only if a user is an editor
+
+# <% if current_user && current_user.editor? %>
+#   <p class="recipe-edit">
+#     <%= link_to "Edit Recipe", edit_recipe_path(@recipe.id) %>
+#   </p>
+# <% end %>
+
+# In the User model, add a method named "admin?" that determines whether a user has an admin role on the site.
+
+# def admin?
+#     self.role == 'admin'
+# end
+
+# in the application controller, create a method named "require_admin"
+
+ # before_action :require_admin, only: [:destroy]
+
+ 
